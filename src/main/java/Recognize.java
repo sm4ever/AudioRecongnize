@@ -1,3 +1,5 @@
+import com.acrcloud.utils.ACRCloudRecognizer;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -7,17 +9,15 @@ import java.util.Map;
 public class Recognize {
     public static void main(String[] args) {
         Map<String, Object> config = new HashMap<String, Object>();
-
-        // replace "XXXXXXXX" with your project's host, access_key and access_secret
         config.put("host", "identify-eu-west-1.acrcloud.com");
         config.put("access_key", "dc720e00f273724c99a2ecc563358623");
         config.put("access_secret", "aTbZWDxYCFpqWhtO7Q1TuozBTnPzTkCaWE1kENZ1");
 
         config.put("debug", false);
-        config.put("timeout", 10); // seconds
+        config.put("timeout", 10);
 
-        com.acrcloud.utils.ACRCloudRecognizer re = new com.acrcloud.utils.ACRCloudRecognizer(config);
-        File wavFile = new File("C:/Users/Mohamed/RecordAudio.wav");
+        ACRCloudRecognizer re = new ACRCloudRecognizer(config);
+        File wavFile = new File("/Users/Mohamed/RecordAudio.wav");
         // It will skip 80 seconds.
         String result = re.recognizeByFile(wavFile.getPath(),0);
         System.out.println(result);
@@ -30,8 +30,8 @@ public class Recognize {
          *
          *
          **/
-
-        File file = new File("C:\\Users\\Mohamed\\RecordAudio.wav");
+/*
+        File file = new File("/Users/Mohamed/RecordAudio.wav");
         byte[] buffer = new byte[3*1024 * 1024];
         if (!file.exists()) {
             return;
@@ -62,6 +62,8 @@ public class Recognize {
         //String result = re.recognizeByFileBuffer(buffer, buffer.length, 100);
         //String result = re.recognizeByFileBuffer(audioBytes, audioBytes.length, 0);
         System.out.println(result);
+
+ */
     }
 
 }

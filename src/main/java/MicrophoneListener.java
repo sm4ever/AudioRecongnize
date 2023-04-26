@@ -1,10 +1,7 @@
 import com.acrcloud.utils.ACRCloudRecognizer;
 
 import javax.sound.sampled.*;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,18 +9,29 @@ public class MicrophoneListener {
     static TargetDataLine line;
     static final long RECORD_TIME = 15000;  // 1 minute
     // path of the wav file
-    static File wavFile = new File("C:/Users/Mohamed/RecordAudio.wav");
-
+    static File wavFile = new File("/Users/Mohamed/RecordAudio.wav");
 
     // format of audio file
     static AudioFileFormat.Type fileType = AudioFileFormat.Type.WAVE;
 
-    public static void main2(String args[]) {
-        byte[] audioBytes = start();
+    public static void main(String args[]) {
+        //byte[] audioBytes = start();
+        Thread stopper = new Thread(() -> {
+            try {
+                Thread.sleep(RECORD_TIME);
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+            finish();
+        });
+
+        stopper.start();
+        start();
+        Recognize.main(new String[0]);
         //play(start());
-        ACRCloudRecognizer re = new ACRCloudRecognizer(getConfig());
-        String result = re.recognizeByFileBuffer(audioBytes, audioBytes.length, 0);
-        System.out.println(result);
+        //ACRCloudRecognizer re = new ACRCloudRecognizer(getConfig());
+        //String result = re.recognizeByFileBuffer(audioBytes, audioBytes.length, 0);
+        //System.out.println(result);
     }
 
     private static Map<String, Object> getConfig() {
@@ -146,8 +154,8 @@ public class MicrophoneListener {
 
     static byte[] start() {
         try {
-            AudioFormat audioFormat = getAudioFormat();
-            //AudioFormat audioFormat = new AudioFormat(44100, 16, 1, true, false);
+            //AudioFormat audioFormat = getAudioFormat();
+            AudioFormat audioFormat = new AudioFormat(44100, 16, 1, true, false);
             DataLine.Info info = new DataLine.Info(TargetDataLine.class, audioFormat);
 
             // checks if system supports the data line
@@ -166,7 +174,9 @@ public class MicrophoneListener {
             AudioSystem.write(ais, fileType, wavFile);
 
 
-            ByteArrayOutputStream out  = new ByteArrayOutputStream();
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+
             int numBytesRead;
             byte[] data = new byte[line.getBufferSize() / 5];
             System.out.println("Start capturing...");
@@ -174,7 +184,7 @@ public class MicrophoneListener {
             long msTime = 15000; //1 Minute = 60000 MS
             long doUntil = (msTime + System.currentTimeMillis()); //1 minute
             while(System.currentTimeMillis() < doUntil){
-                System.out.println(System.currentTimeMillis() +" to " + doUntil);
+                //System.out.println(System.currentTimeMillis() +" to " + doUntil);
                 // Read the next chunk of data from the TargetDataLine.
                 numBytesRead =  line.read(data, 0, data.length);
                 // Save this chunk of data.
@@ -182,7 +192,17 @@ public class MicrophoneListener {
             }
 
 
-            return data;
+            BufferedInputStream in = new BufferedInputStream(new FileInputStream(wavFile));
+
+            int read;
+            byte[] buff = new byte[1024];
+            while ((read = in.read(buff)) > 0)
+            {
+                out.write(buff, 0, read);
+            }
+            out.flush();
+            byte[] audioBytes = out.toByteArray();
+            return audioBytes;
 
 
         } catch (LineUnavailableException ex) {
@@ -199,7 +219,7 @@ public class MicrophoneListener {
         System.out.println("Finished");
     }
 
-    public static void main(String[] args) {
+    public static void main2(String[] args) {
 
 
         // creates a new thread that waits for a specified
